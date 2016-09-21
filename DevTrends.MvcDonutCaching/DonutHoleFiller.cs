@@ -35,7 +35,7 @@ namespace DevTrends.MvcDonutCaching
             return DonutHoles.Replace(content, match => match.Groups[2].Value);
         }
 
-        public string ReplaceDonutHoleContent(string content, ControllerContext filterContext, OutputCacheOptions options)
+        public string ReplaceDonutHoleContent(string content, ControllerContext filterContext, OutputCacheOptions options, Func<string, string> augmentActionResult)
         {
             if (
                 filterContext.IsChildAction &&
@@ -52,12 +52,13 @@ namespace DevTrends.MvcDonutCaching
                     filterContext.Controller,
                     actionSettings.ActionName,
                     actionSettings.ControllerName,
-                    actionSettings.RouteValues
+                    actionSettings.RouteValues,
+                    augmentActionResult
                 );
             });
         }
 
-        private static string InvokeAction(ControllerBase controller, string actionName, string controllerName, RouteValueDictionary routeValues)
+        private static string InvokeAction(ControllerBase controller, string actionName, string controllerName, RouteValueDictionary routeValues, Func<string, string> augmentActionResult)
         {
             var viewContext = new ViewContext(
                 controller.ControllerContext,
@@ -69,7 +70,12 @@ namespace DevTrends.MvcDonutCaching
 
             var htmlHelper = new HtmlHelper(viewContext, new ViewPage());
 
-            return htmlHelper.Action(actionName, controllerName, routeValues).ToString();
+            var actionResult = htmlHelper.Action(actionName, controllerName, routeValues).ToString();
+
+            if (augmentActionResult != null)
+                actionResult = augmentActionResult(actionResult);
+
+            return actionResult;
         }
     }
 }

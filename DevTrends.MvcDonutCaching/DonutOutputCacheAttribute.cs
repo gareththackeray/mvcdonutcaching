@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Web;
+using System.Web.Helpers;
 using System.Web.Mvc;
 using System.Web.UI;
 
@@ -182,11 +183,25 @@ namespace DevTrends.MvcDonutCaching
                 // We have a cached version on the server side
                 if (cachedItem != null)
                 {
+                    Func<string, string> augmentActionResult = null;
+                    //in the somewhat specialist case where:
+                    //- we are returning a JSON object with some HTML in a property
+                    //- that HTML was created with a donut hole in it
+                    //- the action returning the JSON is in a DonutOutputCache action
+
+                    //the replace text should be escaped for JSON but it isn't if it's evaluated here.  Hence we
+                    //escape for JSON if the contenttype tells us it's json.
+                    if (cachedItem.ContentType.Contains("json"))
+                    {
+                        augmentActionResult =
+                            actionResult => HttpUtility.JavaScriptStringEncode(actionResult, addDoubleQuotes: false);
+                    }
+
                     // We inject the previous result into the MVC pipeline
                     // The MVC action won't execute as we injected the previous cached result.
                     filterContext.Result = new ContentResult
                     {
-                        Content = DonutHoleFiller.ReplaceDonutHoleContent(cachedItem.Content, filterContext, CacheSettings.Options),
+                        Content = DonutHoleFiller.ReplaceDonutHoleContent(cachedItem.Content, filterContext, CacheSettings.Options, augmentActionResult),
                         ContentType = cachedItem.ContentType
                     };
                 }
@@ -347,10 +362,7 @@ namespace DevTrends.MvcDonutCaching
 
             var callback = context.HttpContext.Items[cacheKey] as Action<bool>;
 
-            if (callback != null)
-            {
-                callback.Invoke(hasErrors);
-            }
+            callback?.Invoke(hasErrors);
         }
     }
 }
