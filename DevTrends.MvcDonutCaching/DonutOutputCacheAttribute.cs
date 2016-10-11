@@ -69,6 +69,8 @@ namespace DevTrends.MvcDonutCaching
             set;
         }
 
+        public string PrimaryKeyComponents { get; set; }
+
         /// <summary>
         /// Gets or sets the vary-by-custom value.
         /// </summary>
@@ -312,6 +314,7 @@ namespace DevTrends.MvcDonutCaching
                     Duration = Duration,
                     VaryByCustom = VaryByCustom,
                     VaryByParam = VaryByParam,
+                    PrimaryKeyComponents = PrimaryKeyComponents,
                     Location = (int)Location == -1 ? OutputCacheLocation.Server : Location,
                     NoStore = NoStore,
                     Options = Options,
@@ -327,6 +330,7 @@ namespace DevTrends.MvcDonutCaching
                     Duration = Duration == -1 ? cacheProfile.Duration : Duration,
                     VaryByCustom = VaryByCustom ?? cacheProfile.VaryByCustom,
                     VaryByParam = VaryByParam ?? cacheProfile.VaryByParam,
+                    PrimaryKeyComponents = PrimaryKeyComponents,
                     Location = (int)Location == -1 ? ((int)cacheProfile.Location == -1 ? OutputCacheLocation.Server : cacheProfile.Location) : Location,
                     NoStore = _noStore.HasValue ? _noStore.Value : cacheProfile.NoStore,
                     Options = Options,

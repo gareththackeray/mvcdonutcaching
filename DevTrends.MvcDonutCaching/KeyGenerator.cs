@@ -137,6 +137,15 @@ namespace DevTrends.MvcDonutCaching
                 }
             }
 
+            if (!string.IsNullOrEmpty(cacheSettings.PrimaryKeyComponents))
+            {
+                var primaryKeyComponents = cacheSettings.PrimaryKeyComponents.Split(';').ToList();
+                routeValues = new RouteValueDictionary(routeValues.ToDictionary(
+                    x => cacheSettings.PrimaryKeyComponents == "*" || primaryKeyComponents.Contains(x.Key) ? "!!" + x.Key : x.Key,
+                    x => x.Value
+                    ));
+            }
+
             if (!string.IsNullOrEmpty(cacheSettings.VaryByCustom))
             {
                 // If there is an existing route value with the same key as varybycustom, we should overwrite it

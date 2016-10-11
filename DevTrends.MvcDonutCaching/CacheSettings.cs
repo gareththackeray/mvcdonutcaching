@@ -76,5 +76,6 @@ namespace DevTrends.MvcDonutCaching
             }
         }
 
+        public string PrimaryKeyComponents { get; set; }
     }
 }
