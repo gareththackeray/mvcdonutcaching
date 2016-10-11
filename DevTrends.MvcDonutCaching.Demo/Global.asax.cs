@@ -25,7 +25,7 @@ namespace DevTrends.MvcDonutCaching.Demo
 
             Container = RegisterAutofac();
 
-            this.SetSkipByCustomStringDelegate(SkipByCustomString);
+            this.SetSkipOutputCacheByCustomStringDelegate(SkipByCustomString);
         }
 
         private static IContainer RegisterAutofac()

@@ -255,10 +255,26 @@ namespace DevTrends.MvcDonutCaching
 
                 if (CacheSettings.IsServerCachingEnabled && filterContext.HttpContext.Response.StatusCode == 200)
                 {
-                    OutputCacheManager.AddItem(cacheKey, cacheItem, DateTime.UtcNow.AddSeconds(CacheSettings.Duration));
+                    OutputCacheManager.AddItem(cacheKey, cacheItem, DateTime.UtcNow.AddSeconds(GetDuration(filterContext)));
                 }
             });
         }
+
+        private int GetDuration(ControllerContext filterContext)
+        {
+            if (DurationByCustom != null)
+            {
+                var getCustomDurationDelegate =
+                    filterContext.HttpContext.Application[HttpApplicationExtensions.DurationByCustomKey] as
+                        Func<HttpContextBase, string, int?>;
+
+                return getCustomDurationDelegate?.Invoke(filterContext.HttpContext, DurationByCustom) ?? CacheSettings.Duration;
+            }
+
+            return CacheSettings.Duration;
+        }
+
+        public string DurationByCustom { get; set; }
 
         private bool SkipBecauseOfCustom(ControllerContext filterContext)
         {

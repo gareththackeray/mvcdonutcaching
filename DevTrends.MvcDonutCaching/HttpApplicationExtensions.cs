@@ -6,8 +6,9 @@ namespace DevTrends.MvcDonutCaching
     public static class HttpApplicationExtensions
     {
         public const string SkipByCustomApplicationStateKey = "DonutCachingSkipByCustomKey";
+        public const string DurationByCustomKey = "DonutCachingDurationByCustomKey";
 
-        public static void SetSkipByCustomStringDelegate(this HttpApplication application, Func<HttpContextBase, string, bool> func)
+        public static void SetSkipOutputCacheByCustomStringDelegate(this HttpApplication application, Func<HttpContextBase, string, bool> func)
         {
             try
             {
@@ -20,9 +21,27 @@ namespace DevTrends.MvcDonutCaching
             }
         }
 
-        public static Func<HttpContext, string, bool> GetSkipByCustomDelegate(this HttpApplication application)
+        public static Func<HttpContext, string, bool> GetSkipOutputCacheByCustomDelegate(this HttpApplication application)
         {
             return application.Application[SkipByCustomApplicationStateKey] as Func<HttpContext, string, bool>;
+        }
+
+        public static void SetOutputCacheDurationByCustomStringDelegate(this HttpApplication application, Func<HttpContextBase, string, int?> func)
+        {
+            try
+            {
+                application.Application.Lock();
+                application.Application[DurationByCustomKey] = func;
+            }
+            finally
+            {
+                application.Application.UnLock();
+            }
+        }
+
+        public static Func<HttpContext, string, int?> GetOutputCacheDurationByCustomDelegate(this HttpApplication application)
+        {
+            return application.Application[DurationByCustomKey] as Func<HttpContext, string, int?>;
         }
     }
 }

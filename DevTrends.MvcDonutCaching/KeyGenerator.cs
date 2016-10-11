@@ -64,14 +64,15 @@ namespace DevTrends.MvcDonutCaching
             {
                 areaName = routeData.DataTokens[DataTokensKeyArea].ToString();
             }
-
+            
             // remove controller, action and DictionaryValueProvider which is added by the framework for child actions
             var filteredRouteData = routeData.Values.Where(
                 x => x.Key.ToLowerInvariant() != RouteDataKeyController && 
                      x.Key.ToLowerInvariant() != RouteDataKeyAction &&   
                      x.Key.ToLowerInvariant() != DataTokensKeyArea &&
                      !(x.Value is DictionaryValueProvider<object>)
-            ).ToList();
+            )
+            .ToList();
 
             if (!string.IsNullOrWhiteSpace(areaName))
             {
