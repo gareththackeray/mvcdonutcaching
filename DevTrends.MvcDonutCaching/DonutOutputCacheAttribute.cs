@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Helpers;
 using System.Web.Mvc;
@@ -70,6 +72,8 @@ namespace DevTrends.MvcDonutCaching
         }
 
         public string PrimaryKeyComponents { get; set; }
+
+        public string IgnoreParamRegexes { get; set; }
 
         /// <summary>
         /// Gets or sets the vary-by-custom value.
@@ -329,7 +333,8 @@ namespace DevTrends.MvcDonutCaching
                     IsCachingEnabled = CacheSettingsManager.IsCachingEnabledGlobally,
                     Duration = Duration,
                     VaryByCustom = VaryByCustom,
-                    VaryByParam = VaryByParam,
+                    VaryByParam = VaryByParam ?? "*",
+                    IgnoreParamRegexes = IgnoreParamRegexes,
                     PrimaryKeyComponents = PrimaryKeyComponents,
                     Location = (int)Location == -1 ? OutputCacheLocation.Server : Location,
                     NoStore = NoStore,
@@ -345,7 +350,8 @@ namespace DevTrends.MvcDonutCaching
                     IsCachingEnabled = CacheSettingsManager.IsCachingEnabledGlobally && cacheProfile.Enabled,
                     Duration = Duration == -1 ? cacheProfile.Duration : Duration,
                     VaryByCustom = VaryByCustom ?? cacheProfile.VaryByCustom,
-                    VaryByParam = VaryByParam ?? cacheProfile.VaryByParam,
+                    VaryByParam = VaryByParam ?? cacheProfile.VaryByParam ?? "*",
+                    IgnoreParamRegexes = IgnoreParamRegexes,
                     PrimaryKeyComponents = PrimaryKeyComponents,
                     Location = (int)Location == -1 ? ((int)cacheProfile.Location == -1 ? OutputCacheLocation.Server : cacheProfile.Location) : Location,
                     NoStore = _noStore.HasValue ? _noStore.Value : cacheProfile.NoStore,

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -125,16 +126,26 @@ namespace DevTrends.MvcDonutCaching
                 }
             }
 
-            if (!string.IsNullOrEmpty(cacheSettings.VaryByParam))
+            if (cacheSettings.VaryByParam != "*" || !string.IsNullOrEmpty(cacheSettings.IgnoreParamRegexes))
             {
                 if (cacheSettings.VaryByParam.ToLowerInvariant() == "none")
                 {
                     routeValues.Clear();
                 }
-                else if (cacheSettings.VaryByParam != "*")
+                else 
                 {
+                    var regexes = (cacheSettings.IgnoreParamRegexes ?? "").Split(new[] {';'},
+                        StringSplitOptions.RemoveEmptyEntries).Select(s => new Regex(s))
+                        .ToList();
+
                     var parameters = cacheSettings.VaryByParam.ToLowerInvariant().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                    routeValues = new RouteValueDictionary(routeValues.Where(x => parameters.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value));
+                    routeValues = new RouteValueDictionary(
+                        routeValues
+                            .Where(
+                            x => parameters.Contains(x.Key) || 
+                                cacheSettings.VaryByParam == "*" && !regexes.Any(r => r.IsMatch(x.Key))
+                            )
+                            .ToDictionary(x => x.Key, x => x.Value));
                 }
             }
 
